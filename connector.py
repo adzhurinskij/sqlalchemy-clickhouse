@@ -21,7 +21,7 @@ paramstyle = 'pyformat'  # Python extended format codes, e.g. ...WHERE name=%(na
 try:
     isinstance(obj, basestring)
 except NameError:
-    basestring = str
+    basestring = (str, unicode)
 
 class Error(Exception):
     """Exception that is the base class of all other error exceptions.
@@ -114,13 +114,15 @@ class Connection(Database):
     """
         These objects are small stateless factories for cursors, which do all the real work.
     """
-    def __init__(self, db_name, db_url='http://localhost:8123/', username=None, password=None, readonly=False):
+    def __init__(self, db_name, db_url='http://localhost:8123/', username=None, password=None, readonly=False, protocol='http', path='/'):
         super(Connection, self).__init__(db_name, db_url, username, password, readonly)
         self.db_name = db_name
         self.db_url = db_url
         self.username = username
         self.password = password
         self.readonly = readonly
+        self.protocol = protocol
+        self.path = path
 
     def close(self):
         pass
@@ -338,10 +340,12 @@ class Cursor(object):
         assert self._state == self._STATE_RUNNING, "Should be running if processing response"
         cols = None
         data = []
+
         for r in response:
             if not cols:
-                cols = [(f[0], f[1].db_type) for f in r._fields]
-            data.append([getattr(r, f[0]) for f in r._fields])
+                cols = [ (f, r._fields[f]) for f in r._fields ]
+            data.append([ getattr(r, f)  for f in r._fields ])
+
         self._data = data
         self._columns = cols
         self._state = self._STATE_FINISHED

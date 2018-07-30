@@ -185,7 +185,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def create_connect_args(self, url):
         kwargs = {
-            'db_url': 'http://%s:%d/' % (url.host, url.port or 8123),
+            'db_url': '%s://%s:%d/%s' % (url.query['protocol'], url.host, url.port or 8123, url.query['path']),
             'username': url.username,
             'password': url.password,
         }
