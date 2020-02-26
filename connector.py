@@ -101,7 +101,7 @@ def _send(self, data, settings=None, stream=False):
     if r.status_code != 200:
         raise Exception(r.text)
     return r
-Database._send = _send
+# Database._send = _send
 
 #
 # Connector interface
